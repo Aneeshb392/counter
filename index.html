@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            transition: background 0.5s ease;
+        }
+
+        .counter-container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        #counter {
+            font-size: 8em;
+            font-weight: bold;
+            transition: transform 0.3s, text-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .buttons {
+            margin-top: 2em;
+            display: flex;
+            gap: 1em;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .emoji-float {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2em;
+            animation: float 3s linear forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="head">Magical Counter</h1>
+    <div class="counter-container">
+        <div id="counter">0</div>
+    </div>
+    <div class="buttons">
+        <button id="decrement">➖</button>
+        <button id="reset">🌀</button>
+        <button id="increment">➕</button>
+    </div>
+
+    <audio id="click-sound" preload="auto">
+        <source src="./click.wav" type="audio/wav">
+        Your browser does not support the audio element.
+    </audio>
+
+<script>
+let count = 0;
+let isGlitchActive = false;
+
+document.getElementById("increment").addEventListener("click", () => {
+    count++;
+    updateCounter();
+    playClickSound();
+});
+
+document.getElementById("decrement").addEventListener("click", () => {
+    count--;
+    updateCounter();
+    playClickSound();
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+    count = 0;
+    updateCounter();
+    playClickSound();
+});
+
+function updateCounter() {
+    const counterElement = document.getElementById("counter");
+    counterElement.innerText = count;
+    counterElement.style.color = count === 0 ? '#fff' : count > 0 ? '#90EE90' : '#FF6B6B';
+    
+    // Bounce animation with particles
+    counterElement.classList.add("bounce");
+    createParticles(100);
+    setTimeout(() => counterElement.classList.remove("bounce"), 30);
+}
+
+function playClickSound() {
+    const clickSound = document.getElementById("click-sound");
+    clickSound.currentTime = 0;
+    clickSound.play();
+}
+
+// Enhanced color array with more vibrant colors
+const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#FF9999',
+    '#77DD77', '#AEC6CF', '#FFB347', '#B39EB5', '#FF6961', '#FDFD96'
+];
+
+function generateRandomColor() {
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function applyBackgroundShades() {
+    document.body.style.background = `
+        linear-gradient(45deg, 
+            ${generateRandomColor()}, 
+            ${generateRandomColor()}, 
+            ${generateRandomColor()})
+    `;
+}
+
+function applyTextShadow() {
+    const counter = document.getElementById("counter");
+    counter.style.textShadow = `
+        0 0 10px ${generateRandomColor()},
+        0 0 20px ${generateRandomColor()},
+        0 0 30px ${generateRandomColor()}
+    `;
+}
+
+function createParticles(count) {
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement("div");
+        particle.className = "confetti";
+        particle.style.left = `${50 + Math.random() * 10 - 5}%`;
+        particle.style.top = `${50 + Math.random() * 10 - 5}%`;
+        particle.style.background = generateRandomColor();
+        particle.style.animation = `
+            explode ${0.5 + Math.random()}s ease-out forwards
+        `;
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+    }
+}
+
+function createEmojiFloat(emoji) {
+    const emojiElement = document.createElement("div");
+    emojiElement.className = "emoji-float";
+    emojiElement.textContent = emoji;
+    emojiElement.style.left = `${Math.random() * 100}%`;
+    emojiElement.style.color = generateRandomColor();
+    document.body.appendChild(emojiElement);
+    setTimeout(() => emojiElement.remove(), 3000);
+}
+
+function glitchEffect() {
+    if (isGlitchActive) return;
+    isGlitchActive = true;
+    const counter = document.getElementById("counter");
+    counter.style.transform = "translate(5px, 5px)";
+    setTimeout(() => {
+        counter.style.transform = "translate(-5px, -5px)";
+        setTimeout(() => {
+            counter.style.transform = "translate(0)";
+            isGlitchActive = false;
+        }, 50);
+    }, 50);
+}
+
+document.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+        button.style.transform = "scale(0.9)";
+        setTimeout(() => button.style.transform = "scale(1)", 100);
+        createEmojiFloat(['🎉', '✨', '🌟', '💫', '🌈'][Math.floor(Math.random() * 5)]);
+    });
+});
+
+document.addEventListener("keydown", function(e) {
+    document.getElementById("head").style.color = generateRandomColor();
+    applyBackgroundShades();
+    applyTextShadow();
+    glitchEffect();
+});
+
+document.getElementById("counter").addEventListener("click", () => {
+    count *= 2;
+    updateCounter();
+    applyBackgroundShades();
+    createParticles(50);
+});
+
+// Add mouse trail effect
+document.addEventListener("mousemove", function(e) {
+    const trail = document.createElement("div");
+    trail.className = "confetti";
+    trail.style.left = `${e.pageX}px`;
+    trail.style.top = `${e.pageY}px`;
+    trail.style.background = generateRandomColor();
+    trail.style.width = `${5 + Math.random() * 10}px`;
+    trail.style.height = trail.style.width;
+    trail.style.borderRadius = "50%";
+    trail.style.boxShadow = `0 0 10px ${generateRandomColor()}, 0 0 20px ${generateRandomColor()}`;
+    trail.style.transition = "transform 0.5s ease, opacity 0.5s ease";
+    document.body.appendChild(trail);
+    setTimeout(() => {
+        trail.style.transform = "scale(0)";
+        trail.style.opacity = "0";
+    }, 50);
+    setTimeout(() => trail.remove(), 1000);
+});
+
+// Initial setup
+applyBackgroundShades();
+applyTextShadow();
+setInterval(() => {
+    document.querySelectorAll('button').forEach(btn => {
+        btn.style.background = generateRandomColor();
+    });
+}, 1000);
+
+// Add background stars
+for (let i = 0; i < 50; i++) {
+    const star = document.createElement("div");
+    star.className = "confetti";
+    star.style.position = "fixed";
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.width = `${Math.random() * 3}px`;
+    star.style.height = star.style.width;
+    star.style.background = "#fff";
+    star.style.animation = `twinkle ${2 + Math.random() * 3}s infinite`;
+    document.body.appendChild(star);
+}
+</script>
+</body>
+</html>
